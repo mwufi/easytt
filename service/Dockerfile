@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     qbittorrent-nox \
     python3-pip \
     curl \
+    jq \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 18

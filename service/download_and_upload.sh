@@ -3,22 +3,30 @@
 # Download directory
 DOWNLOAD_PATH="/mnt/data"
 
-# Create download directory (should already exist from Dockerfile)
-mkdir -p $DOWNLOAD_PATH 2>/dev/null || true
+# Wait for downloads to complete by monitoring qBittorrent API
+echo "Monitoring torrent downloads..."
 
-# Set qBittorrent config directory
-export QBT_PROFILE=/home/appuser
-
-# Download torrent using qbittorrent-nox (disable web UI to avoid port conflict)
-qbittorrent-nox "$MAGNET_LINK" --save-path=$DOWNLOAD_PATH --profile=$QBT_PROFILE --webui-port=8081
-
-# Wait for download to complete (simplified; use qBittorrent API for robust monitoring)
-while pgrep qbittorrent-nox > /dev/null; do
-    sleep 60
+# Check download status every 30 seconds
+while true; do
+    # Get torrent info from qBittorrent API
+    TORRENT_INFO=$(curl -s http://localhost:8081/api/v2/torrents/info)
+    
+    # Check if all torrents are completed (state: "completed" or "seeding")
+    COMPLETED=$(echo "$TORRENT_INFO" | grep -E '"state":\s*"(completed|seeding)"' | wc -l)
+    TOTAL=$(echo "$TORRENT_INFO" | grep -c '"state"')
+    
+    if [ "$TOTAL" -gt 0 ] && [ "$COMPLETED" -eq "$TOTAL" ]; then
+        echo "All torrents completed. Starting upload to S3..."
+        break
+    fi
+    
+    echo "Download in progress: $COMPLETED/$TOTAL completed"
+    sleep 30
 done
 
-# Upload to S3
+# Upload completed files to S3
+echo "Uploading files to S3 bucket: $S3_BUCKET"
 aws s3 cp $DOWNLOAD_PATH s3://$S3_BUCKET/ --recursive --sse AES256
 
-# Exit
+echo "Upload completed!"
 exit 0

@@ -25,17 +25,29 @@ let downloadProgress = {
 const startTorrentDownload = () => {
   downloadProgress.status = 'downloading';
   
-  exec('./download_and_upload.sh', (error, stdout, stderr) => {
+  // Since qBittorrent is already running, just add the magnet link
+  const magnetLink = process.env.MAGNET_LINK;
+  exec(`curl -X POST http://localhost:8081/api/v2/torrents/add -F "urls=${magnetLink}" -F "savepath=/mnt/data"`, (error, stdout, stderr) => {
     if (error) {
-      console.error(`Error: ${error}`);
+      console.error(`Error adding torrent: ${error}`);
       downloadProgress.status = 'error';
       downloadProgress.error = error.message;
       return;
     }
-    console.log(`stdout: ${stdout}`);
-    console.error(`stderr: ${stderr}`);
-    downloadProgress.status = 'completed';
-    downloadProgress.progress = 100;
+    console.log(`Torrent added successfully`);
+    downloadProgress.status = 'downloading';
+    
+    // Start the upload script
+    exec('./download_and_upload.sh', (uploadError) => {
+      if (uploadError) {
+        console.error(`Upload error: ${uploadError}`);
+        downloadProgress.status = 'error';
+        downloadProgress.error = uploadError.message;
+      } else {
+        downloadProgress.status = 'completed';
+        downloadProgress.progress = 100;
+      }
+    });
   });
 };
 
@@ -68,7 +80,16 @@ app.use('/qbittorrent', createProxyMiddleware({
   changeOrigin: true,
   pathRewrite: {
     '^/qbittorrent': ''
-  }
+  },
+  onError: (err, req, res) => {
+    console.error('Proxy error:', err);
+    res.status(503).json({ 
+      error: 'qBittorrent Web UI is not available yet',
+      message: 'Please wait a moment for qBittorrent to start, or use /start endpoint first'
+    });
+  },
+  // Handle WebSocket connections for qBittorrent
+  ws: true
 }));
 
 // Homepage

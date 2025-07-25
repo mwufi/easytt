@@ -13,10 +13,14 @@ export default $config({
   },
   async run() {
     const api = new sst.aws.ApiGatewayV2("api");
+    const bucket = new sst.aws.Bucket("MyBucket");
+
     api.route("GET /", {
+      link: [bucket],
       handler: "index.upload",
     });
     api.route("GET /latest", {
+      link: [bucket],
       handler: "index.latest",
     });
   },

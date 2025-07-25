@@ -40,7 +40,9 @@ export default $config({
          domain: "torrent.mailpuppy.org",
          ports: [
            { listen: "80/http", redirect: "443/https" },
-           { listen: "443/https", forward: "8080/http" }
+           { listen: "443/https", forward: "8080/http" },
+           { listen: "6881/tcp", forward: "6881/tcp" },
+           { listen: "6881/udp", forward: "6881/udp" }
          ]
        },
        dev: {

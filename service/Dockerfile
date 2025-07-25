@@ -36,8 +36,8 @@ RUN mkdir -p /mnt/data /home/appuser/.cache/qBittorrent /home/appuser/.config/qB
     useradd -u 1000 -m appuser && \
     chown -R appuser:appuser /mnt/data /app /home/appuser
 
-# Expose the API port
-EXPOSE 8080
+# Expose ports
+EXPOSE 8080 8081 6881 6881/udp
 
 # Set environment variable to auto-start download
 ENV AUTO_START=true

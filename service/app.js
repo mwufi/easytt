@@ -108,6 +108,11 @@ app.post('/start', async (req, res) => {
   // Use aria2c with proper options
   const aria2 = spawn('aria2c', [
     '--enable-dht=true',
+    '--enable-dht6=true',
+    '--listen-port=6881',
+    '--dht-listen-port=6881',
+    '--enable-peer-exchange=true',
+    '--bt-tracker=udp://tracker.opentrackr.org:1337/announce,udp://open.tracker.cl:1337/announce,udp://tracker.openbittorrent.com:6969/announce,http://tracker.openbittorrent.com:80/announce,udp://tracker.torrent.eu.org:451/announce,udp://open.stealth.si:80/announce,udp://exodus.desync.com:6969/announce,udp://tracker.moeking.me:6969/announce',
     '--seed-time=0',
     '--max-connection-per-server=16',
     '--split=16',

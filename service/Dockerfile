@@ -26,5 +26,9 @@ RUN mkdir -p /downloads && chmod 777 /downloads
 # Expose API port
 EXPOSE 3000
 
+# Expose BitTorrent ports
+EXPOSE 6881
+EXPOSE 6881/udp
+
 # Start the service
 CMD ["node", "app.js"]

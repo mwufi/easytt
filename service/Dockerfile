@@ -30,6 +30,11 @@ COPY . .
 # Make scripts executable
 RUN chmod +x download_and_upload.sh entrypoint.sh
 
+# Create directories with proper permissions
+RUN mkdir -p /mnt/data /home/appuser/.cache/qBittorrent /home/appuser/.config/qBittorrent && \
+    useradd -u 1000 -m appuser && \
+    chown -R appuser:appuser /mnt/data /app /home/appuser
+
 # Expose the API port
 EXPOSE 8080
 
@@ -37,7 +42,7 @@ EXPOSE 8080
 ENV AUTO_START=true
 
 # Run as non-root user
-USER 1000
+USER appuser
 
 # Start the service
 CMD ["./entrypoint.sh"]

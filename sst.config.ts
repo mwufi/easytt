@@ -37,8 +37,10 @@ export default $config({
        },
        link: [bucket],
        loadBalancer: {
+         domain: "torrent.mailpuppy.org",
          ports: [
-           { listen: "80/http", forward: "8080/http" }
+           { listen: "80/http", redirect: "443/https" },
+           { listen: "443/https", forward: "8080/http" }
          ]
        },
        dev: {

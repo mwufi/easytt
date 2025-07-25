@@ -3,3 +3,5 @@
 .sst
 
 node_modules
+
+test*.sh

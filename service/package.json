@@ -1,0 +1,13 @@
+{
+  "name": "torrent-downloader-service",
+  "version": "1.0.0",
+  "description": "Torrent downloader service with API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "aws-sdk": "^2.1400.0"
+  }
+}

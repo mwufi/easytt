@@ -1,6 +1,5 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
-import { statfsSync } from "fs";
 
 export default $config({
   app(input) {
@@ -12,16 +11,58 @@ export default $config({
     };
   },
   async run() {
+    // Deploy the torrent downloader service
+     // Create a VPC
+     const vpc = new sst.aws.Vpc("MyVpc");
+
+     // Create an ECS cluster
+     const cluster = new sst.aws.Cluster("MyCluster", { vpc });
+ 
+     // Create an S3 bucket
+     const bucket = new sst.aws.Bucket("TorrentDataBucket");
+ 
+     // Create a Fargate service with load balancer for API endpoints
+     const service = new sst.aws.Service("TorrentDownloadService", {
+       cluster,
+       image: {
+         context: "./service",
+         dockerfile: "Dockerfile"
+       },
+       cpu: "1 vCPU",
+       memory: "4 GB",
+       storage: "100 GB", // Ephemeral storage for 59.37 GB dataset
+       environment: {
+         MAGNET_LINK: "magnet:?xt=urn:btih:brl45s3ysyotj6ljolmtnrlvfmyv4y7s&dn=tea&xl=59368985613&fc=57794",
+         S3_BUCKET: bucket.name,
+       },
+       link: [bucket],
+       loadBalancer: {
+         ports: [
+           { listen: "80/http", forward: "8080/http" }
+         ]
+       },
+       dev: {
+         command: "echo 'Local dev not supported for Fargate; deploy to run'",
+       },
+     });
+
+    // Keep existing API routes if needed
     const api = new sst.aws.ApiGatewayV2("api");
-    const bucket = new sst.aws.Bucket("MyBucket");
+    const bucket2 = new sst.aws.Bucket("MyBucket");
 
     api.route("GET /", {
-      link: [bucket],
+      link: [bucket2],
       handler: "index.upload",
     });
     api.route("GET /latest", {
-      link: [bucket],
+      link: [bucket2],
       handler: "index.latest",
     });
+
+    return {
+      service: service.url,
+      bucket: bucket.name,
+      bucket2: bucket2.name,
+    }
   },
 });

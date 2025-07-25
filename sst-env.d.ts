@@ -9,6 +9,18 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Bucket"
     }
+    "MyVpc": {
+      "type": "sst.aws.Vpc"
+    }
+    "TorrentDataBucket": {
+      "name": string
+      "type": "sst.aws.Bucket"
+    }
+    "TorrentDownloadService": {
+      "service": string
+      "type": "sst.aws.Service"
+      "url": string
+    }
     "api": {
       "type": "sst.aws.ApiGatewayV2"
       "url": string

@@ -21,7 +21,7 @@ export default $config({
      // Create an S3 bucket
      const bucket = new sst.aws.Bucket("TorrentDataBucket");
  
-     // Create a Fargate service with load balancer for API endpoints
+     // Create a Fargate service with HTTP-only load balancer for API endpoints
      const service = new sst.aws.Service("TorrentDownloadService", {
        cluster,
        image: {
@@ -30,9 +30,8 @@ export default $config({
        },
        cpu: "1 vCPU",
        memory: "4 GB",
-       storage: "100 GB", // Ephemeral storage for 59.37 GB dataset
+       storage: "100 GB", // Ephemeral storage for torrents
        environment: {
-         MAGNET_LINK: "magnet:?xt=urn:btih:brl45s3ysyotj6ljolmtnrlvfmyv4y7s&dn=tea&xl=59368985613&fc=57794",
          S3_BUCKET: bucket.name,
        },
        link: [bucket],
@@ -40,9 +39,7 @@ export default $config({
          domain: "torrent.mailpuppy.org",
          ports: [
            { listen: "80/http", redirect: "443/https" },
-           { listen: "443/https", forward: "8080/http" },
-           { listen: "6881/tcp", forward: "6881/tcp" },
-           { listen: "6881/udp", forward: "6881/udp" }
+           { listen: "443/https", forward: "3000/http" }
          ]
        },
        dev: {

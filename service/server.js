@@ -3,6 +3,7 @@ const { exec } = require('child_process');
 const fs = require('fs').promises;
 const path = require('path');
 const AWS = require('aws-sdk');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 const PORT = 8080;
@@ -61,6 +62,15 @@ const monitorProgress = async () => {
 // Start monitoring
 setInterval(monitorProgress, 5000);
 
+// Proxy to qBittorrent Web UI
+app.use('/qbittorrent', createProxyMiddleware({
+  target: 'http://localhost:8081',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/qbittorrent': ''
+  }
+}));
+
 // Homepage
 app.get('/', (req, res) => {
   res.json({
@@ -69,7 +79,8 @@ app.get('/', (req, res) => {
       '/': 'Service information',
       '/status': 'Download status and progress',
       '/start': 'Start torrent download',
-      '/files': 'List uploaded files'
+      '/files': 'List uploaded files',
+      '/qbittorrent': 'qBittorrent Web UI (default login: admin/adminadmin)'
     }
   });
 });

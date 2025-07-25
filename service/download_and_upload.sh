@@ -9,8 +9,8 @@ mkdir -p $DOWNLOAD_PATH 2>/dev/null || true
 # Set qBittorrent config directory
 export QBT_PROFILE=/home/appuser
 
-# Download torrent using qbittorrent-nox
-qbittorrent-nox "$MAGNET_LINK" --save-path=$DOWNLOAD_PATH --profile=$QBT_PROFILE
+# Download torrent using qbittorrent-nox (disable web UI to avoid port conflict)
+qbittorrent-nox "$MAGNET_LINK" --save-path=$DOWNLOAD_PATH --profile=$QBT_PROFILE --webui-port=8081
 
 # Wait for download to complete (simplified; use qBittorrent API for robust monitoring)
 while pgrep qbittorrent-nox > /dev/null; do
